@@ -16,10 +16,6 @@ public class BootConfiguration {
     @Bean
     CommandLineRunner commandLineRunner() {
         return (args) -> {
-            User user = new User();
-            user.setUsername("Ryomen");
-            user.setPassword("jujutsu");
-            userRepo.save(user);
         };
     }
 
