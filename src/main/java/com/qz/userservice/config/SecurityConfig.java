@@ -3,6 +3,7 @@ package com.qz.userservice.config;
 import com.qz.userservice.exception.AccessDeniedExceptionHandler;
 import com.qz.userservice.exception.AuthenticationEntryPointExceptionHandler;
 import com.qz.userservice.filter.CsrfTokenGeneratorFilter;
+import com.qz.userservice.filter.JwtGeneratorFilter;
 import com.qz.userservice.model.User;
 import com.qz.userservice.repo.UserRepo;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -49,6 +51,7 @@ public class SecurityConfig {
                             .accessDeniedHandler(new AccessDeniedExceptionHandler());
                 })
                 .addFilterAfter(new CsrfTokenGeneratorFilter(), CsrfFilter.class)
+                .addFilterAfter(new JwtGeneratorFilter(), BasicAuthenticationFilter.class)
                 .build();
     }
 
