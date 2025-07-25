@@ -1,5 +1,6 @@
 package com.qz.userservice.config;
 
+import com.qz.userservice.exception.AccessDeniedExceptionHandler;
 import com.qz.userservice.exception.AuthenticationEntryPointExceptionHandler;
 import com.qz.userservice.filter.CsrfTokenGeneratorFilter;
 import com.qz.userservice.model.User;
@@ -30,7 +31,8 @@ public class SecurityConfig {
         return httpSecurity
                 .authorizeHttpRequests(hrc -> {
                     hrc
-                            .requestMatchers("/login","/", "/csrf-token").permitAll()
+                            .requestMatchers("/").anonymous()
+                            .requestMatchers("/user/register", "/csrf-token").permitAll()
                             .anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
@@ -43,7 +45,8 @@ public class SecurityConfig {
                     smc.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
                 })
                 .exceptionHandling(ex -> {
-                    ex.authenticationEntryPoint(new AuthenticationEntryPointExceptionHandler());
+                    ex.authenticationEntryPoint(new AuthenticationEntryPointExceptionHandler())
+                            .accessDeniedHandler(new AccessDeniedExceptionHandler());
                 })
                 .addFilterAfter(new CsrfTokenGeneratorFilter(), CsrfFilter.class)
                 .build();

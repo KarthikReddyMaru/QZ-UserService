@@ -14,6 +14,8 @@ public class AuthenticationEntryPointExceptionHandler implements AuthenticationE
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         log.info("Login failed due to {} ", authException.getMessage());
-        response.sendRedirect("/login?error=true");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("text/plain"); // or "application/json" for APIs
+        response.getWriter().write("Login Failed, Try again");
     }
 }
