@@ -2,7 +2,6 @@ package com.qz.userservice.controller;
 
 import com.qz.userservice.dto.UserDto;
 import com.qz.userservice.exception.UserNotFoundException;
-import com.qz.userservice.model.User;
 import com.qz.userservice.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,9 +23,10 @@ public class UserController {
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<UserDto> saveUser(@RequestBody User user) {
-        return ResponseEntity.created(URI.create("/user")).body(userService.save(user));
+    @PostMapping("/register")
+    public ResponseEntity<String> saveUser(@RequestBody UserDto userDto) {
+        userService.save(userDto);
+        return ResponseEntity.created(URI.create("/user")).body("User Created");
     }
 
 }

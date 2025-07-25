@@ -18,11 +18,11 @@ public class UserService {
     public UserDto findByUserName(String username) throws UserNotFoundException {
         User user = userRepo.findByUsername(username)
                             .orElseThrow(() -> new UserNotFoundException("User not found with the username "+username));
-        return mapper.map(user);
+        return mapper.mapToDto(user);
     }
 
-    public UserDto save(User newUser) {
-        User user = userRepo.save(newUser);
-        return mapper.map(user);
+    public void save(UserDto newUser) {
+        User user = mapper.mapToEntity(newUser);
+        userRepo.save(user);
     }
 }
