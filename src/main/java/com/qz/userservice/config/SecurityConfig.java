@@ -4,8 +4,10 @@ import com.qz.userservice.exception.AccessDeniedExceptionHandler;
 import com.qz.userservice.exception.AuthenticationEntryPointExceptionHandler;
 import com.qz.userservice.filter.CsrfTokenGeneratorFilter;
 import com.qz.userservice.filter.JwtGeneratorFilter;
+import com.qz.userservice.filter.JwtValidationFilter;
 import com.qz.userservice.model.User;
 import com.qz.userservice.repo.UserRepo;
+import com.qz.userservice.service.JwtService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -17,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
@@ -50,8 +53,9 @@ public class SecurityConfig {
                     ex.authenticationEntryPoint(new AuthenticationEntryPointExceptionHandler())
                             .accessDeniedHandler(new AccessDeniedExceptionHandler());
                 })
+                .addFilterBefore(jwtValidationFilter(jwtService()), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(new CsrfTokenGeneratorFilter(), CsrfFilter.class)
-                .addFilterAfter(new JwtGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(jwtGeneratorFilter(jwtService()), BasicAuthenticationFilter.class)
                 .build();
     }
 
@@ -68,4 +72,18 @@ public class SecurityConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    @Bean
+    JwtValidationFilter jwtValidationFilter(JwtService jwtService) {
+        return new JwtValidationFilter(jwtService);
+    }
+
+    @Bean
+    JwtGeneratorFilter jwtGeneratorFilter(JwtService jwtService) {
+        return new JwtGeneratorFilter(jwtService);
+    }
+
+    @Bean
+    JwtService jwtService() {
+        return new JwtService();
+    }
 }

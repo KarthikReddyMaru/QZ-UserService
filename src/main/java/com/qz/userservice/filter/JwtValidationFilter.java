@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -16,22 +17,18 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class JwtGeneratorFilter extends OncePerRequestFilter {
-    private final String AUTHORIZATION = Token.AUTHORIZATION;
+public class JwtValidationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
+    private final String PREFIX = Token.PREFIX;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String authHeader = request.getHeader(Token.AUTHORIZATION);
-        if(authentication != null && authHeader == null) {
-            String token = jwtService.generateToken(authentication);
-            response.setHeader(AUTHORIZATION, token);
+        String authorizationHeader = request.getHeader(Token.AUTHORIZATION);
+        SecurityContext context = SecurityContextHolder.getContext();
+        if(authorizationHeader != null && authorizationHeader.startsWith(PREFIX) && context.getAuthentication() == null) {
+            String token = authorizationHeader.substring(7);
+            Authentication authentication = jwtService.verifyToken(token);
+            context.setAuthentication(authentication);
         }
-        filterChain.doFilter(request,response);
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return request.getAttribute(AUTHORIZATION) != null;
+        filterChain.doFilter(request, response);
     }
 }
